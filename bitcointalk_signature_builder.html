@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Bitcointalk Campaign Signature Builder</title>
+<style>
+  :root{
+    --bg:#0f172a;
+    --panel:#111827;
+    --panel-2:#1f2937;
+    --text:#e5e7eb;
+    --muted:#94a3b8;
+    --accent:#f59e0b;
+    --accent-2:#22c55e;
+    --border:#334155;
+    --danger:#ef4444;
+    --card:#0b1220;
+  }
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:Arial, Helvetica, sans-serif;
+    background:linear-gradient(180deg,#0b1220,#111827 35%,#0f172a);
+    color:var(--text);
+  }
+  .wrap{max-width:1320px;margin:0 auto;padding:24px}
+  h1{margin:0 0 8px;font-size:30px}
+  p{color:var(--muted);line-height:1.5}
+  .grid{display:grid;grid-template-columns:1.1fr 0.9fr;gap:18px;align-items:start}
+  .card{
+    background:rgba(17,24,39,.92);
+    border:1px solid var(--border);
+    border-radius:18px;
+    padding:18px;
+    box-shadow:0 10px 30px rgba(0,0,0,.25);
+  }
+  .section-title{margin:0 0 12px;font-size:18px}
+  .row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+  .row-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+  .row-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+  .field{margin-bottom:12px}
+  label{
+    display:block;
+    margin-bottom:6px;
+    color:#cbd5e1;
+    font-size:14px;
+    font-weight:700;
+  }
+  input[type="text"], input[type="url"], input[type="number"], select, textarea{
+    width:100%;
+    background:#0b1220;
+    color:var(--text);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:12px;
+    font-size:14px;
+    outline:none;
+  }
+  input[type="color"]{
+    width:100%;
+    height:44px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+  }
+  textarea{min-height:120px; resize:vertical; font-family:Consolas, monospace}
+  .small{font-size:12px;color:var(--muted)}
+  .pillbar{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0 16px}
+  .pill{
+    border:1px solid var(--border);
+    padding:8px 12px;
+    border-radius:999px;
+    cursor:pointer;
+    background:#0b1220;
+    color:#cbd5e1;
+    font-size:13px;
+  }
+  .pill.active{background:#1d4ed8;color:white;border-color:#3b82f6}
+  .actions{display:flex;flex-wrap:wrap;gap:10px;margin-top:8px}
+  button{
+    border:none;
+    border-radius:12px;
+    padding:11px 14px;
+    background:#2563eb;
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+  }
+  button.secondary{background:#374151}
+  button.success{background:#059669}
+  button.warn{background:#b45309}
+  button.ghost{background:transparent;border:1px solid var(--border)}
+  .preview-wrap{
+    background:#0b1220;
+    border:1px dashed #475569;
+    border-radius:14px;
+    padding:16px;
+  }
+  .preview-label{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;color:#cbd5e1;font-size:13px}
+  .forum-row{
+    background:#f7f7f7;
+    color:#111827;
+    border-radius:12px;
+    padding:10px 12px;
+    overflow:hidden;
+    position:relative;
+  }
+  .preview-canvas{
+    min-height:62px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:4px 0;
+  }
+  .sig-box{
+    display:flex;
+    align-items:center;
+    gap:14px;
+    white-space:nowrap;
+    overflow:hidden;
+    max-width:100%;
+    line-height:1.2;
+  }
+  .sig-brand{font-weight:900}
+  .divider{color:#f59e0b;font-weight:700}
+  .sig-bonus{
+    display:flex;flex-direction:column;align-items:flex-start;line-height:1.04;
+    white-space:normal;
+  }
+  .box-banner,.segment-bar,.dark-bar,.split-banner,.cta-bar,.exchange-bar,.stack-lite,.badge-strip,.coin-box,.promo-box,.minimal-line,.capsule-bar{
+    max-width:100%;
+    overflow:hidden;
+  }
+  .box-banner{
+    display:flex;align-items:center;gap:10px;white-space:nowrap;
+  }
+  .box-banner .middle-box,
+  .box-banner .brand-box,
+  .box-banner .bonus-box{
+    border:2px solid transparent;padding:4px 10px;font-weight:800;display:flex;align-items:center
+  }
+  .segment-bar{
+    display:grid;grid-template-columns:auto auto auto auto auto;gap:8px;align-items:center;
+  }
+  .segment-bar .seg{
+    padding:4px 10px;border:2px solid rgba(0,0,0,.1);font-weight:800;text-align:center;white-space:nowrap
+  }
+  .dark-bar{
+    display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
+    background:#0f172a;color:#fff;padding:6px 8px;border-radius:6px
+  }
+  .dark-bar .center-track{
+    display:grid;grid-template-columns:repeat(3,auto);gap:8px;justify-content:center
+  }
+  .split-banner{
+    display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+  }
+  .split-banner .core{
+    display:grid;grid-template-columns:auto auto auto;gap:8px;align-items:center;justify-content:center
+  }
+  .cta-bar{
+    display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+    border-top:2px solid rgba(0,0,0,.25);border-bottom:2px solid rgba(0,0,0,.25);padding:6px 0;
+  }
+  .exchange-bar{
+    display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
+    padding:4px 8px;
+  }
+  .exchange-bar .badge-grid{
+    display:grid;grid-template-columns:repeat(4,auto);gap:4px;justify-content:end
+  }
+  .exchange-bar .badge{
+    padding:2px 6px;font-size:12px;font-weight:800
+  }
+  .stack-lite{
+    display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
+  }
+  .badge-strip{
+    display:grid;grid-template-columns:auto 1fr auto auto;gap:8px;align-items:center;
+  }
+  .badge-strip .mid{
+    display:flex;align-items:center;gap:8px;justify-content:center;white-space:nowrap
+  }
+  .coin-box{
+    display:grid;grid-template-columns:auto auto 1fr auto;gap:10px;align-items:center;
+  }
+  .promo-box{
+    display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;
+  }
+  .promo-box .core{
+    display:grid;grid-template-columns:auto auto auto;gap:8px;align-items:center;justify-content:center
+  }
+  .minimal-line{
+    display:flex;align-items:center;gap:10px;white-space:nowrap;justify-content:center;
+  }
+  .capsule-bar{
+    display:grid;grid-template-columns:auto auto auto auto;gap:8px;align-items:center;
+  }
+  .capsule-bar .cap{
+    padding:4px 10px;border-radius:999px;font-weight:800;white-space:nowrap
+  }
+
+  .height-guide{
+    margin-top:10px;height:42px;border:2px dashed rgba(239,68,68,.5);
+    border-radius:10px;position:relative;overflow:hidden
+  }
+  .height-guide span{
+    position:absolute;right:8px;top:8px;font-size:12px;color:#7f1d1d;
+    background:#fee2e2;padding:2px 6px;border-radius:999px
+  }
+  .ascii-preview{
+    background:#020617;color:#f8fafc;border:1px solid var(--border);border-radius:12px;
+    padding:12px;overflow:auto;font-family:Consolas, monospace;min-height:180px;white-space:pre;line-height:1
+  }
+  .note{
+    border-left:3px solid var(--accent);background:rgba(245,158,11,.08);padding:10px 12px;
+    border-radius:10px;color:#e2e8f0;font-size:13px;margin:10px 0 0
+  }
+  .stat{
+    display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;margin-top:10px
+  }
+  .stat .box{
+    background:#0b1220;border:1px solid var(--border);border-radius:12px;padding:10px
+  }
+  .box strong{display:block;font-size:18px;margin-bottom:4px}
+  .tag{display:inline-block;padding:3px 8px;border-radius:999px;background:#0b1220;border:1px solid var(--border);font-size:12px;margin-right:6px}
+  .footer{margin-top:20px;color:#94a3b8;font-size:12px}
+  .template-grid{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:10px
+  }
+  .template-card{
+    border:1px solid var(--border);
+    background:#0b1220;
+    border-radius:14px;
+    padding:10px;
+    cursor:pointer;
+  }
+  .template-card.active{outline:2px solid #3b82f6;border-color:#3b82f6}
+  .template-thumb{
+    height:42px;
+    border-radius:10px;
+    background:linear-gradient(180deg,#f8fafc,#e5e7eb);
+    margin-bottom:8px;
+    position:relative;
+    overflow:hidden;
+  }
+  .thumb-bar{position:absolute;left:8px;right:8px;top:12px;height:18px;border-radius:4px}
+  .thumb-chip{position:absolute;top:14px;height:14px;border-radius:3px}
+  .rank-lock{
+    padding:10px 12px;border-radius:12px;background:#0b1220;border:1px solid var(--border);margin-top:10px
+  }
+  .mono{font-family:Consolas, monospace}
+  
+  .donate-hero{
+    display:flex;
+    justify-content:center;
+    margin:0 0 18px;
+  }
+  .donate-bottom{
+    display:flex;
+    justify-content:center;
+    margin:26px 0 6px;
+  }
+  .donate-btn{
+    background:linear-gradient(90deg,#f59e0b,#f97316);
+    color:#fff;
+    border:none;
+    border-radius:999px;
+    padding:16px 28px;
+    font-size:18px;
+    font-weight:900;
+    box-shadow:0 12px 28px rgba(249,115,22,.28);
+    cursor:pointer;
+    letter-spacing:.3px;
+  }
+  .donate-btn:hover{filter:brightness(1.05)}
+  .modal-backdrop{
+    position:fixed;
+    inset:0;
+    background:rgba(2,6,23,.72);
+    display:none;
+    align-items:center;
+    justify-content:center;
+    padding:16px;
+    z-index:1000;
+  }
+  .modal-backdrop.show{display:flex}
+  .modal{
+    width:min(720px,100%);
+    background:#0b1220;
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:20px;
+    box-shadow:0 18px 40px rgba(0,0,0,.35);
+  }
+  .modal-head{
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  .modal-head h3{
+    margin:0;
+    font-size:22px;
+  }
+  .close-btn{
+    background:transparent;
+    border:1px solid var(--border);
+    color:var(--text);
+    border-radius:12px;
+    padding:8px 12px;
+    cursor:pointer;
+  }
+  .wallet-list{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:12px;
+    margin-top:12px;
+  }
+  .wallet-card{
+    background:var(--card);
+    border:1px solid var(--border);
+    border-radius:16px;
+    padding:14px;
+  }
+  .wallet-card strong{
+    display:block;
+    margin-bottom:8px;
+    font-size:15px;
+  }
+  .wallet-address{
+    background:#020617;
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:10px;
+    font-family:Consolas, monospace;
+    font-size:12px;
+    line-height:1.4;
+    word-break:break-all;
+    color:#e2e8f0;
+  }
+  .wallet-actions{
+    display:flex;
+    gap:8px;
+    margin-top:10px;
+  }
+  .mini-btn{
+    background:#2563eb;
+    color:#fff;
+    border:none;
+    border-radius:10px;
+    padding:8px 10px;
+    font-weight:700;
+    cursor:pointer;
+  }
+
+  @media (max-width: 980px){
+    .grid{grid-template-columns:1fr}
+    .row,.row-3,.row-4,.template-grid,.wallet-list{grid-template-columns:1fr}
+    .stat{grid-template-columns:repeat(2,minmax(0,1fr))}
+    .wrap{padding:16px}
+    h1{font-size:24px}
+    .card{padding:14px}
+    .donate-btn{width:100%;max-width:420px;font-size:17px;padding:15px 20px}
+    .preview-wrap{padding:12px}
+    .forum-row{padding:8px 10px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>Bitcointalk Campaign Signature Builder</h1>
+  <p>Build BBCode signatures for Full Member, Sr. Member and Hero/Legendary with switchable template families, rank-aware sizing, an image-to-ASCII converter and a live crop guide.</p>
+
+  <div class="donate-hero">
+    <button type="button" class="donate-btn" id="openDonateTop">Donate in Crypto</button>
+  </div>
+
+
+  <div class="grid">
+    <div class="card">
+      <h2 class="section-title">1) Signature Builder</h2>
+
+      <div class="field">
+        <label>Rank preset</label>
+        <div class="pillbar" id="rankPills">
+          <button type="button" class="pill active" data-rank="full">Full Member</button>
+          <button type="button" class="pill" data-rank="sr">Sr. Member</button>
+          <button type="button" class="pill" data-rank="hero">Hero / Legendary</button>
+        </div>
+        <div class="small" id="rankHint"></div>
+      </div>
+
+      <div class="field">
+        <label for="template">Template family</label>
+        <select id="template"></select>
+      </div>
+
+      <div class="template-grid" id="templateCards"></div>
+
+      <div class="rank-lock">
+        <strong>Rank lock</strong>
+        <div class="small" id="rankLockHint"></div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="siteUrl">Website URL</label>
+          <input id="siteUrl" type="url" value="https://coinroyale.com/" />
+        </div>
+        <div class="field">
+          <label for="brand">Brand name</label>
+          <input id="brand" type="text" value="CoinRoyale" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="leftWord">Left brand text</label>
+          <input id="leftWord" type="text" value="COIN" />
+        </div>
+        <div class="field">
+          <label for="rightWord">Right brand text</label>
+          <input id="rightWord" type="text" value="ROYALE" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="slogan">Middle slogan</label>
+          <input id="slogan" type="text" value="Oldest Bitcoin Casino" />
+        </div>
+        <div class="field">
+          <label for="subline">Sub line / extra text</label>
+          <input id="subline" type="text" value="EST. 2013" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="bonusTitle">Bonus title</label>
+          <input id="bonusTitle" type="text" value="WELCOME BONUS" />
+        </div>
+        <div class="field">
+          <label for="bonusValue">Bonus value</label>
+          <input id="bonusValue" type="text" value="UP TO 1.5 BTC" />
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="symbol">Divider / icon</label>
+          <select id="symbol"></select>
+        </div>
+        <div class="field">
+          <label for="objectType">Object near brand</label>
+          <select id="objectType"></select>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="field">
+          <label for="objectStyle">Object style</label>
+          <select id="objectStyle">
+            <option value="single">Single both sides</option>
+            <option value="double">Double both sides</option>
+            <option value="boxed">Boxed object</option>
+            <option value="leftonly">Left only</option>
+            <option value="none">None</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="ctaText">CTA text</label>
+          <input id="ctaText" type="text" value="PLAY NOW" />
+        </div>
+      </div>
+
+      <div class="row-4">
+        <div class="field">
+          <label for="brandColor1">Brand color 1</label>
+          <input id="brandColor1" type="color" value="#000000" />
+        </div>
+        <div class="field">
+          <label for="brandColor2">Brand color 2</label>
+          <input id="brandColor2" type="color" value="#ffb600" />
+        </div>
+        <div class="field">
+          <label for="accentColor">Accent color</label>
+          <input id="accentColor" type="color" value="#ffbc21" />
+        </div>
+        <div class="field">
+          <label for="panelColor">Panel color</label>
+          <input id="panelColor" type="color" value="#1f2937" />
+        </div>
+      </div>
+
+      <div class="row-3">
+        <div class="field">
+          <label for="metaColor">Secondary text color</label>
+          <input id="metaColor" type="color" value="#111111" />
+        </div>
+        <div class="field">
+          <label for="bonusColor">Bonus label color</label>
+          <input id="bonusColor" type="color" value="#1f283c" />
+        </div>
+        <div class="field">
+          <label for="ctaColor">CTA color</label>
+          <input id="ctaColor" type="color" value="#3b82f6" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button id="buildBtn">Generate Signature Code</button>
+        <button class="secondary" id="copyCodeBtn">Copy Signature Code</button>
+        <button class="ghost" id="loadDemoBtn">Load Demo</button>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <label for="bbcodeOutput">Generated BBCode</label>
+        <textarea id="bbcodeOutput"></textarea>
+      </div>
+
+      <div class="note">
+        Full Member gets tighter spacing, smaller type and simpler blocks. Hero/Legendary gets richer emphasis, larger accents and more expressive templates through rank lock.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">2) Live Preview</h2>
+      <div class="preview-wrap">
+        <div class="preview-label">
+          <span id="previewRank">Full Member preview</span>
+          <span class="tag">Safe-height guide</span>
+        </div>
+
+        <div class="forum-row">
+          <div class="preview-canvas" id="previewCanvas"></div>
+        </div>
+
+        <div class="height-guide">
+          <span>42px crop guide</span>
+        </div>
+
+        <div class="stat">
+          <div class="box">
+            <strong id="estHeight">32px</strong>
+            <div class="small">Estimated rendered height</div>
+          </div>
+          <div class="box">
+            <strong id="charCount">0</strong>
+            <div class="small">BBCode characters</div>
+          </div>
+          <div class="box">
+            <strong id="rankStyle">Compact</strong>
+            <div class="small">Rank lock mode</div>
+          </div>
+          <div class="box">
+            <strong id="templateName">Classic</strong>
+            <div class="small">Selected template</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="note" id="previewNote"></div>
+    </div>
+  </div>
+
+  <div class="grid" style="margin-top:18px">
+    <div class="card">
+      <h2 class="section-title">3) Image to ASCII / BBCode</h2>
+      <div class="row">
+        <div class="field">
+          <label for="imageInput">Upload image</label>
+          <input id="imageInput" type="file" accept="image/*" />
+        </div>
+        <div class="field">
+          <label for="asciiWidth">ASCII width</label>
+          <input id="asciiWidth" type="number" min="20" max="120" value="48" />
+        </div>
+      </div>
+
+      <div class="row-3">
+        <div class="field">
+          <label for="asciiChars">Character ramp</label>
+          <input id="asciiChars" type="text" value="@#S%?*+;:,. " />
+        </div>
+        <div class="field">
+          <label for="asciiColor">ASCII BBCode color</label>
+          <input id="asciiColor" type="color" value="#ffbc21" />
+        </div>
+        <div class="field">
+          <label for="asciiSize">ASCII size (pt)</label>
+          <input id="asciiSize" type="number" min="1" max="6" value="2" />
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="success" id="convertImageBtn">Convert Image</button>
+        <button class="secondary" id="copyAsciiBtn">Copy ASCII BBCode</button>
+      </div>
+
+      <div class="field" style="margin-top:14px">
+        <label>ASCII preview</label>
+        <div class="ascii-preview" id="asciiPreview">Upload an image, choose width and click Convert Image.</div>
+      </div>
+
+      <div class="field">
+        <label for="asciiBbcode">Generated ASCII BBCode</label>
+        <textarea id="asciiBbcode"></textarea>
+      </div>
+
+      <div class="note">
+        Detailed logos and animal shapes still need manual cleanup after conversion. Simpler icons, badges and wordmarks convert best.
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">4) Quick Help</h2>
+      <p><span class="tag">Full Member</span> Tight text, narrower spacing, flatter blocks and simpler objects.</p>
+      <p><span class="tag">Sr. Member</span> Balanced middle ground with stronger block separation and larger type.</p>
+      <p><span class="tag">Hero / Legendary</span> Richer template treatment, bolder CTA blocks, and stronger segment styling.</p>
+      <p><strong>Template families included:</strong> classic, coin royale box, flat segmented, dark sportsbook, exchange strip, translator strip, promo split, rounded capsules, center-highlight, cta-edge, clean minimal and badge ribbon.</p>
+      <div class="footer">
+        Build your code here, then test the final BBCode in Bitcointalk profile signature preview or the test board before client delivery.
+      </div>
+    </div>
+  </div>
+
+
+  <div class="donate-bottom">
+    <button type="button" class="donate-btn" id="openDonateBottom"> Donate in Crypto</button>
+  </div>
+
+  <div class="modal-backdrop" id="donateModal">
+    <div class="modal" role="dialog" aria-modal="true" aria-labelledby="donateTitle">
+      <div class="modal-head">
+        <h3 id="donateTitle">Donate with Crypto</h3>
+        <button type="button" class="close-btn" id="closeDonateModal">Close</button>
+      </div>
+      <p class="small">Choose any wallet below and copy the address you want to support.</p>
+
+      <div class="wallet-list">
+        <div class="wallet-card">
+          <strong>BTC</strong>
+          <div class="wallet-address" id="wallet-btc">1jzR9XaG53m1SZQGkJpogj8TJkw9ocDnE</div>
+          <div class="wallet-actions">
+            <button type="button" class="mini-btn copy-wallet" data-target="wallet-btc">Copy BTC</button>
+          </div>
+        </div>
+        <div class="wallet-card">
+          <strong>ETH (ERC20)</strong>
+          <div class="wallet-address" id="wallet-eth">0x0062fbcb97e10e338c7b60500a69644743eb4512</div>
+          <div class="wallet-actions">
+            <button type="button" class="mini-btn copy-wallet" data-target="wallet-eth">Copy ETH</button>
+          </div>
+        </div>
+        <div class="wallet-card">
+          <strong>Solana</strong>
+          <div class="wallet-address" id="wallet-sol">5pU6o52pwNprpwZ1aVaFCrgckozCJ6ZVYLny34kpA9VM</div>
+          <div class="wallet-actions">
+            <button type="button" class="mini-btn copy-wallet" data-target="wallet-sol">Copy SOL</button>
+          </div>
+        </div>
+        <div class="wallet-card">
+          <strong>USDT (TRC20)</strong>
+          <div class="wallet-address" id="wallet-usdt">TZ1FTHM2ZzQHyuqZ2j5DLY8HrDcGmW47oC</div>
+          <div class="wallet-actions">
+            <button type="button" class="mini-btn copy-wallet" data-target="wallet-usdt">Copy USDT</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+const state = { rank: 'full' };
+
+const dividerOptions = [
+  '♦','◆','●','■','|','¦','‖','•','►','▸','▷','★','✦','✧','✪','⚡','🔥','💎','₿','🪙','⚙','❖','▐▌','::'
+];
+
+const objectOptions = [
+  {value:'',label:'None'},
+  {value:'♛',label:'Crown'},
+  {value:'★',label:'Star'},
+  {value:'✦',label:'Spark'},
+  {value:'⚡',label:'Lightning'},
+  {value:'🔥',label:'Fire'},
+  {value:'💎',label:'Diamond'},
+  {value:'₿',label:'Bitcoin'},
+  {value:'🪙',label:'Coin'},
+  {value:'🎁',label:'Gift'},
+  {value:'🏆',label:'Trophy'},
+  {value:'⚔',label:'Sword'},
+  {value:'☘',label:'Leaf'},
+  {value:'⬢',label:'Hex'},
+  {value:'✪',label:'Badge'}
+];
+
+const templateFamilies = [
+  {id:'classic', name:'Classic Horizontal', blurb:'Simple logo + slogan + bonus', thumb:'classic'},
+  {id:'coinbox', name:'Coin Box Banner', blurb:'CoinRoyale style boxed center', thumb:'coinbox'},
+  {id:'segmented', name:'Segmented Promo Bar', blurb:'Rainbet-like segmented layout', thumb:'segmented'},
+  {id:'darkbar', name:'Dark Sportsbook Bar', blurb:'Stake / Duel-style dark strip', thumb:'darkbar'},
+  {id:'exchange', name:'Exchange Strip', blurb:'Swap / exchange badges layout', thumb:'exchange'},
+  {id:'translator', name:'Translator / Alliance Strip', blurb:'Split info + join/hire blocks', thumb:'translator'},
+  {id:'promosplit', name:'Promo Split Banner', blurb:'Brand | feature | CTA', thumb:'promosplit'},
+  {id:'capsule', name:'Rounded Capsule Bar', blurb:'Pill-shaped segment style', thumb:'capsule'},
+  {id:'highlight', name:'Center Highlight', blurb:'Wide center value emphasis', thumb:'highlight'},
+  {id:'ctaedge', name:'CTA Edge Banner', blurb:'Call-to-action weighted far right', thumb:'ctaedge'},
+  {id:'minimal', name:'Clean Minimal Line', blurb:'Very compact line for Full Member', thumb:'minimal'},
+  {id:'badge', name:'Badge Ribbon', blurb:'Logo + badges + bonus ribbon', thumb:'badge'}
+];
+
+const rankConfig = {
+  full: {
+    label:'Full Member',
+    rankHint:'Rank lock: compact output, reduced padding, tighter type, simpler objects.',
+    previewNote:'Full Member preview keeps tighter spacing and flatter block styles to stay safer around Bitcointalk clipping.',
+    style:'Compact',
+    mult:0.92,
+    stackBonus:true
+  },
+  sr: {
+    label:'Sr. Member',
+    rankHint:'Rank lock: balanced spacing and stronger segment contrast.',
+    previewNote:'Sr. Member preview adds moderate spacing and more visible segmentation.',
+    style:'Balanced',
+    mult:1.15,
+    stackBonus:true
+  },
+  hero: {
+    label:'Hero / Legendary',
+    rankHint:'Rank lock: richer block styling, larger type, stronger CTA treatment.',
+    previewNote:'Hero / Legendary preview gets richer emphasis, wider blocks, and more prominent CTA treatment.',
+    style:'Rich',
+    mult:1.30,
+    stackBonus:true
+  }
+};
+
+const el = id => document.getElementById(id);
+
+function optionHTML(value, label){
+  return `<option value="${value.replace(/"/g,'&quot;')}">${label}</option>`;
+}
+el('symbol').innerHTML = dividerOptions.map(v => optionHTML(v, v)).join('');
+el('objectType').innerHTML = objectOptions.map(o => optionHTML(o.value, o.label)).join('');
+el('symbol').value = '♦';
+el('objectType').value = '♛';
+
+el('template').innerHTML = templateFamilies.map(t => optionHTML(t.id, t.name)).join('');
+
+const templateCards = el('templateCards');
+templateCards.innerHTML = templateFamilies.map(t => `
+  <div class="template-card" data-template="${t.id}">
+    <div class="template-thumb">${renderThumb(t.thumb)}</div>
+    <div><strong>${t.name}</strong></div>
+    <div class="small">${t.blurb}</div>
+  </div>
+`).join('');
+
+function renderThumb(type){
+  switch(type){
+    case 'coinbox':
+      return `<div class="thumb-bar" style="background:#f1f5f9;border:1px solid #cbd5e1"></div>
+              <div class="thumb-chip" style="left:10px;width:70px;background:#1e293b"></div>
+              <div class="thumb-chip" style="left:92px;width:120px;background:#f59e0b"></div>
+              <div class="thumb-chip" style="right:10px;width:74px;background:#1e293b"></div>`;
+    case 'segmented':
+      return `<div class="thumb-chip" style="left:10px;width:86px;background:#1e293b"></div>
+              <div class="thumb-chip" style="left:102px;width:48px;background:#f59e0b"></div>
+              <div class="thumb-chip" style="left:156px;width:48px;background:#60a5fa"></div>
+              <div class="thumb-chip" style="left:210px;width:48px;background:#60a5fa"></div>
+              <div class="thumb-chip" style="right:10px;width:64px;background:#3b82f6"></div>`;
+    case 'darkbar':
+      return `<div class="thumb-bar" style="background:#0f172a"></div>
+              <div class="thumb-chip" style="left:12px;width:92px;background:#1e3a8a"></div>
+              <div class="thumb-chip" style="right:12px;width:66px;background:#2563eb"></div>`;
+    case 'exchange':
+      return `<div class="thumb-chip" style="left:10px;width:88px;background:#0f172a"></div>
+              <div class="thumb-chip" style="left:105px;width:122px;background:#10b981"></div>
+              <div class="thumb-chip" style="right:10px;width:58px;background:#f59e0b"></div>`;
+    case 'translator':
+      return `<div class="thumb-chip" style="left:10px;width:68px;background:#1e3a8a"></div>
+              <div class="thumb-chip" style="left:84px;width:120px;background:#dbeafe"></div>
+              <div class="thumb-chip" style="right:82px;width:48px;background:#60a5fa"></div>
+              <div class="thumb-chip" style="right:10px;width:64px;background:#93c5fd"></div>`;
+    case 'promosplit':
+      return `<div class="thumb-chip" style="left:10px;width:82px;background:#111827"></div>
+              <div class="thumb-chip" style="left:98px;width:140px;background:#ef4444"></div>
+              <div class="thumb-chip" style="right:10px;width:56px;background:#f59e0b"></div>`;
+    case 'capsule':
+      return `<div class="thumb-chip" style="left:10px;width:70px;background:#6366f1;border-radius:999px"></div>
+              <div class="thumb-chip" style="left:88px;width:90px;background:#8b5cf6;border-radius:999px"></div>
+              <div class="thumb-chip" style="left:186px;width:90px;background:#06b6d4;border-radius:999px"></div>
+              <div class="thumb-chip" style="right:10px;width:64px;background:#14b8a6;border-radius:999px"></div>`;
+    case 'highlight':
+      return `<div class="thumb-chip" style="left:10px;width:88px;background:#111827"></div>
+              <div class="thumb-chip" style="left:106px;width:146px;background:#e5e7eb;border:2px solid #f59e0b"></div>
+              <div class="thumb-chip" style="right:10px;width:68px;background:#111827"></div>`;
+    case 'ctaedge':
+      return `<div class="thumb-bar" style="background:#f3f4f6;border-top:2px solid #111827;border-bottom:2px solid #111827"></div>
+              <div class="thumb-chip" style="left:10px;width:86px;background:#1e293b"></div>
+              <div class="thumb-chip" style="right:10px;width:74px;background:#f97316"></div>`;
+    case 'minimal':
+      return `<div class="thumb-chip" style="left:16px;width:250px;background:#0f172a"></div>`;
+    case 'badge':
+      return `<div class="thumb-chip" style="left:10px;width:84px;background:#111827"></div>
+              <div class="thumb-chip" style="left:100px;width:130px;background:#06b6d4"></div>
+              <div class="thumb-chip" style="right:76px;width:48px;background:#10b981"></div>
+              <div class="thumb-chip" style="right:10px;width:58px;background:#111827"></div>`;
+    default:
+      return `<div class="thumb-chip" style="left:10px;width:88px;background:#111827"></div>
+              <div class="thumb-chip" style="left:108px;width:126px;background:#f59e0b"></div>
+              <div class="thumb-chip" style="right:10px;width:62px;background:#1e293b"></div>`;
+  }
+}
+
+function escapeBBCodeText(str){
+  return String(str || '').replace(/\[/g, '(').replace(/\]/g, ')');
+}
+function getValue(id){ return el(id).value.trim(); }
+
+function setTemplate(templateId){
+  el('template').value = templateId;
+  [...document.querySelectorAll('.template-card')].forEach(card => {
+    card.classList.toggle('active', card.dataset.template === templateId);
+  });
+  updatePreview();
+}
+
+[...document.querySelectorAll('.template-card')].forEach(card => {
+  card.addEventListener('click', () => setTemplate(card.dataset.template));
+});
+
+function setRank(rank){
+  state.rank = rank;
+  document.querySelectorAll('#rankPills .pill').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.rank === rank);
+  });
+  updatePreview();
+}
+
+function objectTokens(){
+  const obj = getValue('objectType');
+  const style = getValue('objectStyle');
+  const accent = getValue('accentColor');
+  if(!obj || style === 'none') return {left:'', right:''};
+
+  const token = `[color=${accent}]${obj}[/color]`;
+  if(style === 'single') return {left: token + ' ', right: ' ' + token};
+  if(style === 'double') return {left: token + token + ' ', right: ' ' + token + token};
+  if(style === 'boxed') return {
+    left: `[color=${accent}][${obj}][/color] `,
+    right: ` [color=${accent}][${obj}][/color]`
+  };
+  if(style === 'leftonly') return {left: token + ' ', right:''};
+  return {left:'', right:''};
+}
+
+function rankLockedMetrics(){
+  const base = rankConfig[state.rank];
+  return {
+    brandSize: Math.round(18 * base.mult),
+    sloganSize: Math.round(15 * base.mult),
+    sublineSize: Math.max(7, Math.round(8 * base.mult)),
+    bonusTitleSize: Math.max(7, Math.round(9 * base.mult)),
+    bonusValueSize: Math.round(16 * base.mult),
+    gap: state.rank === 'full' ? 6 : state.rank === 'sr' ? 12 : 14,
+    padY: state.rank === 'full' ? 4 : state.rank === 'sr' ? 6 : 8,
+    padX: state.rank === 'full' ? 8 : state.rank === 'sr' ? 12 : 16,
+    radius: state.rank === 'hero' ? 12 : 8
+  };
+}
+
+
+function buildBBCode(){
+  const cfg = rankLockedMetrics();
+  const rank = rankConfig[state.rank];
+  const url = getValue('siteUrl') || 'https://example.com/';
+  const template = getValue('template');
+
+  const left = escapeBBCodeText(getValue('leftWord'));
+  const right = escapeBBCodeText(getValue('rightWord'));
+  const slogan = escapeBBCodeText(getValue('slogan'));
+  const subline = escapeBBCodeText(getValue('subline'));
+  const symbol = escapeBBCodeText(getValue('symbol')) || '♦';
+  const bonusTitle = escapeBBCodeText(getValue('bonusTitle'));
+  const bonusValue = escapeBBCodeText(getValue('bonusValue'));
+  const ctaText = escapeBBCodeText(getValue('ctaText'));
+
+  const c1 = getValue('brandColor1');
+  const c2 = getValue('brandColor2');
+  const ca = getValue('accentColor');
+  const cm = getValue('metaColor');
+  const cb = getValue('bonusColor');
+  const cp = getValue('panelColor');
+  const cta = getValue('ctaColor');
+  const obj = objectTokens();
+
+  const brandInline = `${obj.left}[color=${c1}]${left}[/color][color=${c2}]${right}[/color]${obj.right}`;
+
+  // Avoid wrapping [url] around [table] blocks — Bitcointalk breaks those links.
+  const brandBoxLinked = `[table][tr][td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt]${brandInline}[/size][/font][/url][/td][/tr][tr][td][url=${url}][size=${cfg.sublineSize}pt][color=${ca}]${subline}[/color][/size][/url][/td][/tr][/table]`;
+
+  const bonusStackLinked = `[table][tr][td][center][url=${url}][font=Arial Black][size=${cfg.bonusTitleSize}pt][color=${cb}]${bonusTitle}[/color][/size][/font][/url][/center][/td][/tr][tr][td][center][url=${url}][font=Impact][size=${cfg.bonusValueSize}pt][color=${cb}]${bonusValue}[/color][/size][/font][/url][/center][/td][/tr][/table]`;
+
+  const heroBonusInline = `[url=${url}][font=Arial Black][size=${cfg.bonusTitleSize}pt][color=${cb}]${bonusTitle}[/color][/size][/font] [font=Impact][size=${cfg.bonusValueSize}pt][color=${cb}]${bonusValue}[/color][/size][/font][/url]`;
+
+  const bonusBlock = rank.stackBonus ? bonusStackLinked : heroBonusInline;
+  const sloganText = `[font=Verdana][size=${cfg.sloganSize}pt][b][color=${cm}]${slogan}[/color][/b][/size][/font]`;
+  const dividerLine = `[td][size=${cfg.brandSize}pt][color=#cce]|[/color][/td]`;
+
+  switch(template){
+    case 'coinbox':
+      return `[center][table][tr]
+[td]${brandBoxLinked}[/td]
+${dividerLine}
+[td][table][tr][td][url=${url}]${sloganText}[/url][/td][/tr][/table][/td]
+${dividerLine}
+[td]${bonusBlock}[/td]
+[/tr][/table][/center]`;
+
+    case 'segmented':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=${c1}]${left}[/color][color=${c2}]${right}[/color][/size][/font][/url][/td]
+${dividerLine}
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${ca}]$20K[/color][/size][/font][/url][/td]
+${dividerLine}
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cta}]$25K[/color][/size][/font][/url][/td]
+${dividerLine}
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cta}]$100K[/color][/size][/font][/url][/td]
+${dividerLine}
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cta}]${ctaText}[/color][/size][/font][/url][/td]
+[/tr][/table][/center]`;
+
+    case 'darkbar':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=#ffffff]${left}[/color][color=${c2}]${right}[/color][/size][/font][/url][/td]
+${dividerLine}
+[td][url=${url}][font=Arial Black][size=${cfg.sloganSize}pt][color=#ffffff]${slogan}[/color][/size][/font][/url][/td]
+${dividerLine}
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cta}]${ctaText}[/color][/size][/font][/url][/td]
+[/tr][/table][/center]`;
+
+    case 'exchange':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=${c1}]${left}[/color][color=${c2}]${right}[/color][/size][/font][/url][/td]
+${dividerLine}
+[td][url=${url}][font=Arial Black][size=${cfg.sloganSize}pt][color=${cm}]${slogan}[/color][/size][/font][/url][/td]
+${dividerLine}
+[td][url=${url}][color=${ca}]BTC[/color][/url][/td]
+[td][url=${url}][color=${ca}]ETH[/color][/url][/td]
+[td][url=${url}][color=${ca}]USDT[/color][/url][/td]
+${dividerLine}
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cta}]${ctaText}[/color][/size][/font][/url][/td]
+[/tr][/table][/center]`;
+
+    case 'translator':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=${c1}]${left}${right}[/color][/size][/font][/url][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.sloganSize}pt][color=${cm}]${slogan}[/color][/size][/font][/url][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.bonusTitleSize}pt][color=${cta}]VISIT ANN THREAD[/color][/size][/font][/url][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cta}]JOIN US[/color][/size][/font][/url][/td]
+[/tr][/table][/center]`;
+
+    case 'promosplit':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=${c1}]${left}${right}[/color][/size][/font][/url][/td]
+[td][color=${ca}]${symbol}${symbol}[/color][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.sloganSize}pt][color=${cm}]${slogan}[/color][/size][/font][/url][/td]
+[td][color=${ca}]${symbol}${symbol}[/color][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cta}]${ctaText}[/color][/size][/font][/url][/td]
+[/tr][/table][/center]`;
+
+    case 'capsule':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=${c1}]${left}${right}[/color][/size][/font][/url][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.sloganSize}pt][color=${ca}]${bonusTitle}[/color][/size][/font][/url][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.sloganSize}pt][color=${cta}]${bonusValue}[/color][/size][/font][/url][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cm}]${ctaText}[/color][/size][/font][/url][/td]
+[/tr][/table][/center]`;
+
+    case 'highlight':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt]${brandInline}[/size][/font][/url][/td]
+[td][url=${url}]${sloganText}[/url][/td]
+[td]${bonusBlock}[/td]
+[/tr][/table][/center]`;
+
+    case 'ctaedge':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=${c1}]${left}[/color][color=${c2}]${right}[/color][/size][/font][/url][/td]
+[td][color=${ca}] ${symbol} [/color][/td]
+[td][url=${url}]${sloganText}[/url][/td]
+[td][color=${ca}] ${symbol} [/color][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.bonusValueSize}pt][color=${cta}]${ctaText}[/color][/size][/font][/url][/td]
+[/tr][/table][/center]`;
+
+    case 'minimal':
+      return `[center][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=${c1}]${left}[/color][color=${c2}]${right}[/color][/size][/font][/url] [color=${ca}]${symbol}[/color] [url=${url}]${sloganText}[/url] [color=${ca}]${symbol}[/color] [url=${url}][font=Arial Black][size=${cfg.bonusTitleSize}pt][color=${cb}]${bonusTitle}[/color][/size][/font] [font=Impact][size=${cfg.bonusValueSize}pt][color=${cb}]${bonusValue}[/color][/size][/font][/url][/center]`;
+
+    case 'badge':
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt][color=${c1}]${left}${right}[/color][/size][/font][/url][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.bonusTitleSize}pt][color=${cta}]VIP[/color][/size][/font][/url][/td]
+[td][url=${url}][font=Arial Black][size=${cfg.bonusTitleSize}pt][color=${cta}]${subline}[/color][/size][/font][/url][/td]
+[td]${bonusBlock}[/td]
+[/tr][/table][/center]`;
+
+    default:
+      return `[center][table][tr]
+[td][url=${url}][font=Arial Black][size=${cfg.brandSize}pt]${brandInline}[/size][/font][/url][/td]
+[td][color=${ca}] ${symbol} [/color][/td]
+[td][url=${url}]${sloganText}[/url][/td]
+[td][color=${ca}] ${symbol} [/color][/td]
+[td]${bonusBlock}[/td]
+[/tr][/table][/center]`;
+  }
+}
+
+function buildPreview(){
+  const cfg = rankLockedMetrics();
+  const rank = rankConfig[state.rank];
+  const template = getValue('template');
+  const left = getValue('leftWord') || 'COIN';
+  const right = getValue('rightWord') || 'ROYALE';
+  const slogan = getValue('slogan') || 'Oldest Bitcoin Casino';
+  const subline = getValue('subline') || 'EST. 2013';
+  const bonusTitle = getValue('bonusTitle') || 'WELCOME BONUS';
+  const bonusValue = getValue('bonusValue') || 'UP TO 1.5 BTC';
+  const ctaText = getValue('ctaText') || 'PLAY NOW';
+  const symbol = getValue('symbol') || '♦';
+
+  const c1 = getValue('brandColor1');
+  const c2 = getValue('brandColor2');
+  const ca = getValue('accentColor');
+  const cm = getValue('metaColor');
+  const cb = getValue('bonusColor');
+  const cp = getValue('panelColor');
+  const cta = getValue('ctaColor');
+
+  const objVal = getValue('objectType');
+  const objStyle = getValue('objectStyle');
+
+  function objectSpan(side){
+    if(!objVal || objStyle === 'none') return '';
+    let text = objVal;
+    if(objStyle === 'double') text = objVal + objVal;
+    if(objStyle === 'boxed') text = '[' + objVal + ']';
+    if(objStyle === 'leftonly' && side === 'right') return '';
+    return `<span style="color:${ca}">${text}</span>`;
+  }
+
+  const previewCanvas = el('previewCanvas');
+  el('previewRank').textContent = `${rank.label} preview`;
+  el('rankHint').textContent = rank.rankHint;
+  el('previewNote').textContent = rank.previewNote;
+  el('rankStyle').textContent = rank.style;
+  el('templateName').textContent = templateFamilies.find(t => t.id === template)?.name || 'Classic';
+  el('rankLockHint').textContent = `${rank.style} mode active. This template automatically tightens for Full Member and becomes richer for Hero / Legendary.`;
+
+  const brandHTML = `
+    <span class="sig-brand" style="font-size:${cfg.brandSize}pt">
+      ${objectSpan('left')}
+      <span style="color:${c1}">${left}</span><span style="color:${c2}">${right}</span>
+      ${objectSpan('right')}
+    </span>
+  `;
+  const sloganHTML = `<span style="font-size:${cfg.sloganSize}pt;color:${cm};font-style:${template === 'minimal' ? 'normal' : 'italic'};font-weight:700">${slogan}</span>`;
+  const bonusStack = `<span class="sig-bonus"><span style="font:900 ${cfg.bonusTitleSize}pt Arial;color:${cb}">${bonusTitle}</span><span style="font:900 ${cfg.bonusValueSize}pt Impact;color:${cb}">${bonusValue}</span></span>`;
+  const bonusInline = `<span style="font:900 ${cfg.bonusTitleSize}pt Arial;color:${cb}">${bonusTitle}</span> <span style="font:900 ${cfg.bonusValueSize}pt Impact;color:${cb}">${bonusValue}</span>`;
+  const bonusHTML = rank.stackBonus ? bonusStack : bonusInline;
+
+  let html = '';
+
+  switch(template){
+    case 'coinbox':
+      html = `
+        <div class="box-banner" style="gap:${cfg.gap}px">
+          <div class="brand-box" style="background:${cp};color:#fff;border-color:${ca};padding:${cfg.padY}px ${cfg.padX}px">
+            <div>
+              ${brandHTML}
+              <div style="font-size:${cfg.sublineSize}pt;color:${ca};text-align:center">${subline}</div>
+            </div>
+          </div>
+          <div style="color:${ca};font-weight:900">${symbol}</div>
+          <div class="middle-box" style="background:${cp};color:#fff;border-color:${ca};padding:${cfg.padY}px ${cfg.padX*1.2}px">
+            ${sloganHTML}
+          </div>
+          <div style="color:${ca};font-weight:900">${symbol}</div>
+          <div class="bonus-box" style="padding:${cfg.padY}px ${cfg.padX}px">${bonusHTML}</div>
+        </div>`;
+      break;
+    case 'segmented':
+      html = `
+        <div class="segment-bar" style="gap:${cfg.gap}px">
+          <div class="seg" style="background:${cp};color:#fff">${brandHTML}</div>
+          <div class="seg" style="background:${ca};color:#111">$20K</div>
+          <div class="seg" style="background:${cta};color:#fff">$25K</div>
+          <div class="seg" style="background:${cta};color:#fff">$100K</div>
+          <div class="seg" style="background:${cta};color:#fff">${ctaText}</div>
+        </div>`;
+      break;
+    case 'darkbar':
+      html = `
+        <div class="dark-bar" style="border-radius:${cfg.radius}px">
+          <div>${brandHTML}</div>
+          <div class="center-track">
+            <span style="font-size:${cfg.sloganSize}pt;font-weight:800;color:#fff">${slogan}</span>
+          </div>
+          <div style="background:${cta};padding:${cfg.padY}px ${cfg.padX}px;border-radius:${cfg.radius}px;font-weight:900">${ctaText}</div>
+        </div>`;
+      break;
+    case 'exchange':
+      html = `
+        <div class="exchange-bar">
+          <div>${brandHTML}</div>
+          <div style="font-size:${cfg.sloganSize}pt;font-weight:800;color:${cm}">${slogan}</div>
+          <div class="badge-grid">
+            <span class="badge" style="background:${ca};color:#111">BTC</span>
+            <span class="badge" style="background:${cta};color:#fff">ETH</span>
+            <span class="badge" style="background:#22c55e;color:#fff">USDT</span>
+            <span class="badge" style="background:#f59e0b;color:#111">${ctaText}</span>
+          </div>
+        </div>`;
+      break;
+    case 'translator':
+      html = `
+        <div class="badge-strip">
+          <div>${brandHTML}</div>
+          <div class="mid">
+            <span style="font-size:${cfg.sloganSize}pt;font-weight:800;color:${cm}">${slogan}</span>
+          </div>
+          <div style="font-size:${cfg.bonusTitleSize}pt;font-weight:900;color:${cta};white-space:nowrap">VISIT ANN THREAD</div>
+          <div style="font-size:${cfg.bonusValueSize}pt;font-weight:900;color:${cta};white-space:nowrap">JOIN US</div>
+        </div>`;
+      break;
+    case 'promosplit':
+      html = `
+        <div class="promo-box">
+          <div>${brandHTML}</div>
+          <div class="core">
+            <span style="color:${ca};font-weight:900">${symbol}${symbol}</span>
+            <span style="font-size:${cfg.sloganSize}pt;font-weight:900;color:${cm}">${slogan}</span>
+            <span style="color:${ca};font-weight:900">${symbol}${symbol}</span>
+          </div>
+          <div style="font-size:${cfg.bonusValueSize}pt;font-weight:900;color:${cta};white-space:nowrap">${ctaText}</div>
+        </div>`;
+      break;
+    case 'capsule':
+      html = `
+        <div class="capsule-bar">
+          <div class="cap" style="background:${cp};color:#fff">${brandHTML}</div>
+          <div class="cap" style="background:${ca};color:#111">${bonusTitle}</div>
+          <div class="cap" style="background:${cta};color:#fff">${bonusValue}</div>
+          <div class="cap" style="background:#e2e8f0;color:#111">${ctaText}</div>
+        </div>`;
+      break;
+    case 'highlight':
+      html = `
+        <div class="split-banner">
+          <div>${brandHTML}</div>
+          <div class="core">
+            <span style="font-size:${cfg.sloganSize}pt;font-weight:900;padding:${cfg.padY}px ${cfg.padX*1.3}px;background:#f8fafc;border:2px solid ${ca};color:${cm}">${slogan}</span>
+          </div>
+          <div>${bonusHTML}</div>
+        </div>`;
+      break;
+    case 'ctaedge':
+      html = `
+        <div class="cta-bar">
+          <div>${brandHTML}</div>
+          <div style="font-size:${cfg.sloganSize}pt;font-weight:900;color:${cm};white-space:nowrap">${slogan}</div>
+          <div style="padding:${cfg.padY}px ${cfg.padX}px;background:${cta};color:#fff;border-radius:${cfg.radius}px;font-weight:900;white-space:nowrap">${ctaText}</div>
+        </div>`;
+      break;
+    case 'minimal':
+      html = `
+        <div class="minimal-line">
+          ${brandHTML}
+          <span style="color:${ca};font-weight:900">${symbol}</span>
+          ${sloganHTML}
+          <span style="color:${ca};font-weight:900">${symbol}</span>
+          ${bonusInline}
+        </div>`;
+      break;
+    case 'badge':
+      html = `
+        <div class="badge-strip">
+          <div>${brandHTML}</div>
+          <div class="mid">
+            <span style="padding:2px 8px;background:${cta};color:#fff;font-weight:900;border-radius:4px">VIP</span>
+            <span style="padding:2px 8px;background:${ca};color:#111;font-weight:900;border-radius:4px">${subline}</span>
+          </div>
+          <div>${bonusHTML}</div>
+          <div style="background:${cp};color:#fff;padding:${cfg.padY}px ${cfg.padX}px;font-weight:900;border-radius:${cfg.radius}px">BONUS</div>
+        </div>`;
+      break;
+    default:
+      html = `
+        <div class="sig-box" style="gap:${cfg.gap}px">
+          ${brandHTML}
+          <span class="divider" style="color:${ca}">${symbol}</span>
+          ${sloganHTML}
+          <span class="divider" style="color:${ca}">${symbol}</span>
+          ${bonusHTML}
+        </div>`;
+  }
+
+  previewCanvas.innerHTML = html;
+}
+
+function updatePreview(){
+  buildPreview();
+  const bb = buildBBCode();
+  el('bbcodeOutput').value = bb;
+  el('charCount').textContent = bb.length;
+
+  requestAnimationFrame(() => {
+    const h = Math.round(el('previewCanvas').getBoundingClientRect().height);
+    el('estHeight').textContent = h + 'px';
+  });
+}
+
+function copyText(text){
+  navigator.clipboard.writeText(text).then(() => {
+    alert('Copied.');
+  }).catch(() => {
+    alert('Copy failed. You can copy manually from the box.');
+  });
+}
+
+
+function openDonateModal(){
+  el('donateModal').classList.add('show');
+}
+function closeDonateModal(){
+  el('donateModal').classList.remove('show');
+}
+
+function loadDemo(){
+  el('siteUrl').value = 'https://coinroyale.com/';
+  el('brand').value = 'CoinRoyale';
+  el('leftWord').value = 'COIN';
+  el('rightWord').value = 'ROYALE';
+  el('slogan').value = 'Oldest Bitcoin Casino';
+  el('subline').value = 'EST. 2013';
+  el('bonusTitle').value = 'WELCOME BONUS';
+  el('bonusValue').value = 'UP TO 1.5 BTC';
+  el('symbol').value = '♦';
+  el('objectType').value = '♛';
+  el('objectStyle').value = 'single';
+  el('ctaText').value = 'PLAY NOW';
+  el('brandColor1').value = '#000000';
+  el('brandColor2').value = '#ffb600';
+  el('accentColor').value = '#ffbc21';
+  el('panelColor').value = '#1f2937';
+  el('metaColor').value = '#111111';
+  el('bonusColor').value = '#1f283c';
+  el('ctaColor').value = '#3b82f6';
+  setRank('full');
+  setTemplate('coinbox');
+}
+
+// ASCII generator
+let loadedImage = null;
+
+function imageToAscii(img, width, chars){
+  const ratio = img.height / img.width;
+  const height = Math.max(1, Math.round(width * ratio * 0.5));
+  const canvas = document.createElement('canvas');
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(img, 0, 0, width, height);
+  const data = ctx.getImageData(0, 0, width, height).data;
+
+  let ascii = '';
+  for(let y = 0; y < height; y++){
+    for(let x = 0; x < width; x++){
+      const i = (y * width + x) * 4;
+      const r = data[i], g = data[i+1], b = data[i+2], a = data[i+3];
+      if(a < 40){ ascii += ' '; continue; }
+      const brightness = (0.299*r + 0.587*g + 0.114*b) / 255;
+      const idx = Math.min(chars.length - 1, Math.floor(brightness * (chars.length - 1)));
+      ascii += chars[idx];
+    }
+    if(y < height - 1) ascii += '\n';
+  }
+  return ascii;
+}
+
+function asciiToBBCode(ascii){
+  const color = getValue('asciiColor');
+  const size = parseInt(getValue('asciiSize') || '2', 10);
+  const lines = ascii.split('\n').map(line => line.replace(/ /g, '[nbsp]'));
+  return `[font=Courier New][size=${size}pt][color=${color}]${lines.join('[br]\n')}[/color][/size][/font]`;
+}
+
+document.querySelectorAll('input, select').forEach(node => {
+  node.addEventListener('input', updatePreview);
+  node.addEventListener('change', updatePreview);
+});
+
+document.querySelectorAll('#rankPills .pill').forEach(btn => {
+  btn.addEventListener('click', () => setRank(btn.dataset.rank));
+});
+
+el('template').addEventListener('change', () => setTemplate(el('template').value));
+el('buildBtn').addEventListener('click', updatePreview);
+el('copyCodeBtn').addEventListener('click', () => copyText(el('bbcodeOutput').value));
+el('loadDemoBtn').addEventListener('click', loadDemo);
+
+el('imageInput').addEventListener('change', (e) => {
+  const file = e.target.files && e.target.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = () => {
+    const img = new Image();
+    img.onload = () => { loadedImage = img; };
+    img.src = reader.result;
+  };
+  reader.readAsDataURL(file);
+});
+
+el('convertImageBtn').addEventListener('click', () => {
+  if(!loadedImage){
+    alert('Please upload an image first.');
+    return;
+  }
+  const width = Math.max(20, Math.min(120, parseInt(getValue('asciiWidth') || '48', 10)));
+  const chars = getValue('asciiChars') || '@#S%?*+;:,. ';
+  const ascii = imageToAscii(loadedImage, width, chars);
+  el('asciiPreview').textContent = ascii;
+  el('asciiBbcode').value = asciiToBBCode(ascii);
+});
+
+el('copyAsciiBtn').addEventListener('click', () => copyText(el('asciiBbcode').value));
+
+
+el('openDonateTop').addEventListener('click', openDonateModal);
+el('openDonateBottom').addEventListener('click', openDonateModal);
+el('closeDonateModal').addEventListener('click', closeDonateModal);
+el('donateModal').addEventListener('click', (e) => {
+  if(e.target.id === 'donateModal') closeDonateModal();
+});
+document.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape') closeDonateModal();
+});
+document.querySelectorAll('.copy-wallet').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const target = document.getElementById(btn.dataset.target);
+    copyText(target.textContent.trim());
+  });
+});
+
+setTemplate('coinbox');
+loadDemo();
+</script>
+</body>
+</html>
