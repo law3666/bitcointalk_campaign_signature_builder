@@ -367,7 +367,7 @@
 <div class="wrap">
 <h1>Bitcointalk Campaign Signature Builder</h1>
   <p>Build BBCode signatures for Full Member, Sr. Member and Hero/Legendary with switchable template families, rank-aware sizing, an image-to-ASCII converter and a live crop guide.</p>
-
+	<p>If you find this tool helpful, feel free to support the project by clicking the donate button. Thank you for your support!</p>
   <div class="donate-hero">
     <button type="button" class="donate-btn" id="openDonateTop"> Donate in Crypto</button>
   </div>
@@ -382,27 +382,27 @@
       <div class="row">
         <div class="field">
           <label for="brand">Brand Name</label>
-          <input id="brand" type="text" value="CoinRoyale" />
+          <input id="brand" type="text" value="BitcoinTalk" />
         </div>
         <div class="field">
           <label for="leftWord">Logo Left</label>
-          <input id="leftWord" type="text" value="COIN" />
+          <input id="leftWord" type="text" value="BITCOIN" />
         </div>
       </div>
       <div class="row">
         <div class="field">
           <label for="rightWord">Logo Right</label>
-          <input id="rightWord" type="text" value="ROYALE" />
+          <input id="rightWord" type="text" value="TALK" />
         </div>
         <div class="field">
           <label for="siteUrl">Website URL</label>
-          <input id="siteUrl" type="url" value="https://coinroyale.com/" />
+          <input id="siteUrl" type="url" value="https://bitcointalk.org/" />
         </div>
       </div>
       <div class="row">
         <div class="field">
           <label for="slogan">Main Slogan</label>
-          <input id="slogan" type="text" value="Oldest Bitcoin Casino" />
+          <input id="slogan" type="text" value="Oldest Bitcoin Forum" />
         </div>
         <div class="field">
           <label for="subline">Subline (Est/Date)</label>
@@ -850,9 +850,9 @@ function buildPreview(){
   const cfg = rankLockedMetrics();
   const rank = rankConfig[state.rank];
   const template = getValue('template');
-  const left = getValue('leftWord') || 'COIN';
-  const right = getValue('rightWord') || 'ROYALE';
-  const slogan = getValue('slogan') || 'Oldest Bitcoin Casino';
+  const left = getValue('leftWord') || 'BITCOIN';
+  const right = getValue('rightWord') || 'TALK';
+  const slogan = getValue('slogan') || 'Oldest Bitcoin Forum';
   const subline = getValue('subline') || 'EST. 2013';
   const bonusTitle = getValue('bonusTitle') || 'WELCOME BONUS';
   const bonusValue = getValue('bonusValue') || 'UP TO 1.5 BTC';
@@ -1067,11 +1067,11 @@ function closeDonateModal(){
 }
 
 function loadDemo(){
-  el('siteUrl').value = 'https://coinroyale.com/';
-  el('brand').value = 'CoinRoyale';
-  el('leftWord').value = 'COIN';
-  el('rightWord').value = 'ROYALE';
-  el('slogan').value = 'Oldest Bitcoin Casino';
+  el('siteUrl').value = 'https://bitcointalk.org/';
+  el('brand').value = 'BitcoinTalk';
+  el('leftWord').value = 'BITCOIN';
+  el('rightWord').value = 'TALK';
+  el('slogan').value = 'Oldest Bitcoin Forum';
   el('subline').value = 'EST. 2013';
   el('bonusTitle').value = 'WELCOME BONUS';
   el('bonusValue').value = 'UP TO 1.5 BTC';
