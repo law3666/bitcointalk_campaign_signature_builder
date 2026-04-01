@@ -198,15 +198,15 @@
           <div class="pill" data-rank="hero">Hero / Legendary</div>
         </div>
         <div class="row">
-          <div class="field"><label for="brand">Brand Name</label><input id="brand" type="text" value="CoinRoyale" /></div>
-          <div class="field"><label for="leftWord">Logo Left</label><input id="leftWord" type="text" value="COIN" /></div>
+          <div class="field"><label for="brand">Brand Name</label><input id="brand" type="text" value="BitcoinTalk" /></div>
+          <div class="field"><label for="leftWord">Logo Left</label><input id="leftWord" type="text" value="BITCOIN" /></div>
         </div>
         <div class="row">
-          <div class="field"><label for="rightWord">Logo Right</label><input id="rightWord" type="text" value="ROYALE" /></div>
-          <div class="field"><label for="siteUrl">Website URL</label><input id="siteUrl" type="url" value="https://coinroyale.com/" /></div>
+          <div class="field"><label for="rightWord">Logo Right</label><input id="rightWord" type="text" value="TALK" /></div>
+          <div class="field"><label for="siteUrl">Website URL</label><input id="siteUrl" type="url" value="https://bitcointalk.org/" /></div>
         </div>
         <div class="row">
-          <div class="field"><label for="slogan">Main Slogan</label><input id="slogan" type="text" value="Oldest Bitcoin Casino" /></div>
+          <div class="field"><label for="slogan">Main Slogan</label><input id="slogan" type="text" value="Oldest Bitcoin Forum" /></div>
           <div class="field"><label for="subline">Subline (Est/Date)</label><input id="subline" type="text" value="EST. 2013" /></div>
         </div>
         <div class="row">
@@ -451,7 +451,7 @@ function buildPreview(){
   const templateId = getValue('template');
   const template = templateFamilies.find(t => t.id === templateId) || templateFamilies[0];
   const cp = getValue('panelColor'), ca = getValue('accentColor'), cta = getValue('ctaColor'), cm = getValue('metaColor'), cb = getValue('bonusColor');
-  const left = getValue('leftWord') || 'COIN', right = getValue('rightWord') || 'ROYALE', slogan = getValue('slogan') || 'Oldest Bitcoin Casino';
+  const left = getValue('leftWord') || 'BITCOIN', right = getValue('rightWord') || 'TALK', slogan = getValue('slogan') || 'Oldest Bitcoin Forum';
   const subline = getValue('subline'), bonusTitle = getValue('bonusTitle'), bonusValue = getValue('bonusValue'), ctaText = getValue('ctaText'), symbol = getValue('symbol');
   const objVal = getValue('objectType'), objStyle = getValue('objectStyle');
   
